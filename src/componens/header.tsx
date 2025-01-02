@@ -1,6 +1,5 @@
 import React, { FormEvent, useRef, useEffect } from 'react';
 
-
 type Props = {
   addTodo: (event: FormEvent<HTMLFormElement>) => void;
   todo: string;
@@ -13,7 +12,6 @@ export const Header: React.FC<Props> = ({
   setTodo,
   closeInput,
 }) => {
-
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -21,6 +19,7 @@ export const Header: React.FC<Props> = ({
       inputRef.current?.focus();
     }
   }, [todo]);
+
   return (
     <header className="todoapp__header">
       <button

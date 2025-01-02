@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useRef, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { Todo } from './types/Todo';
 import { ErrorMessage } from './componens/ErrorMessage';
 import { FilterType } from './types/FilterType';
@@ -118,6 +118,7 @@ export const App: React.FC = () => {
 
   const updateCompleted = (todoItem: Todo) => {
     const { id, completed, userId, title } = todoItem;
+
     addLoadingId(id);
 
     updateTodo({
@@ -201,11 +202,7 @@ export const App: React.FC = () => {
             <div
               data-cy="Todo"
               key={todoItem.id}
-              className={classNames(
-                'todo',
-                { 'completed': todoItem.completed },
-                { 'has-background-white-ter': isLoadingIds },
-              )}
+              className={classNames('todo', { completed: todoItem.completed })}
               style={{
                 opacity: isLoadingIds.includes(todoItem.id) ? 0.75 : 1,
               }}
