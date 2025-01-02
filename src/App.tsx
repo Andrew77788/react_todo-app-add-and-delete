@@ -9,6 +9,8 @@ import {
   postTodo,
   updateTodo,
 } from './api/todos';
+import classNames from 'classnames';
+import { Header } from './componens/header';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -19,14 +21,6 @@ export const App: React.FC = () => {
   const [changeTodoId, setChangeTodoId] = useState<number | null>(null);
   const [newTitle, setNewTitle] = useState<string>('');
   const [closeInput, setCloseInput] = useState<boolean>(true);
-
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    if (!todo) {
-      inputRef.current?.focus();
-    }
-  }, [todo]);
 
   const addLoadingId = (id: number) => {
     setIsLoadingIds(prev => [...prev, id]);
@@ -124,6 +118,7 @@ export const App: React.FC = () => {
 
   const updateCompleted = (todoItem: Todo) => {
     const { id, completed, userId, title } = todoItem;
+    addLoadingId(id);
 
     updateTodo({
       id: id,
@@ -135,6 +130,7 @@ export const App: React.FC = () => {
         setTodos(prevTodos =>
           prevTodos.map(t => (t.id === updatedTodo.id ? updatedTodo : t)),
         );
+        removeLoadingId(id);
       })
       .catch(() => handleError('Unable to update a todo'));
   };
@@ -193,35 +189,25 @@ export const App: React.FC = () => {
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <header className="todoapp__header">
-          <button
-            type="button"
-            className="todoapp__toggle-all active"
-            data-cy="ToggleAllButton"
-          />
-
-          <form onSubmit={addTodo}>
-            <input
-              data-cy="NewTodoField"
-              type="text"
-              className="todoapp__new-todo"
-              placeholder="What needs to be done?"
-              value={todo}
-              onChange={e => setTodo(e.target.value)}
-              disabled={!closeInput}
-              ref={inputRef}
-            />
-          </form>
-        </header>
+        <Header
+          addTodo={addTodo}
+          todo={todo}
+          setTodo={setTodo}
+          closeInput={closeInput}
+        />
 
         <section className="todoapp__main" data-cy="TodoList">
           {todoFilter.map(todoItem => (
             <div
               data-cy="Todo"
               key={todoItem.id}
-              className={`todo ${todoItem.completed ? 'completed' : ''}`}
+              className={classNames(
+                'todo',
+                { 'completed': todoItem.completed },
+                { 'has-background-white-ter': isLoadingIds },
+              )}
               style={{
-                opacity: isLoadingIds.includes(todoItem.id) ? 0.5 : 1,
+                opacity: isLoadingIds.includes(todoItem.id) ? 0.75 : 1,
               }}
             >
               <label className="todo__status-label">
@@ -267,6 +253,7 @@ export const App: React.FC = () => {
             </div>
           ))}
         </section>
+
         {todos.length > 0 && (
           <footer className="todoapp__footer" data-cy="Footer">
             <span className="todo-count" data-cy="TodosCounter">
@@ -276,7 +263,9 @@ export const App: React.FC = () => {
             <nav className="filter" data-cy="Filter">
               <a
                 href="#/"
-                className={`filter__link ${filter === FilterType.All ? 'selected' : ''}`}
+                className={classNames('filter__link', {
+                  selected: filter === FilterType.All,
+                })}
                 data-cy="FilterLinkAll"
                 onClick={() => setFilter(FilterType.All)}
               >
@@ -285,7 +274,9 @@ export const App: React.FC = () => {
 
               <a
                 href="#/active"
-                className={`filter__link ${filter === FilterType.Active ? 'selected' : ''}`}
+                className={classNames('filter__link', {
+                  selected: filter === FilterType.Active,
+                })}
                 data-cy="FilterLinkActive"
                 onClick={() => setFilter(FilterType.Active)}
               >
@@ -294,7 +285,9 @@ export const App: React.FC = () => {
 
               <a
                 href="#/completed"
-                className={`filter__link ${filter === FilterType.Completed ? 'selected' : ''}`}
+                className={classNames('filter__link', {
+                  selected: filter === FilterType.Completed,
+                })}
                 data-cy="FilterLinkCompleted"
                 onClick={() => setFilter(FilterType.Completed)}
               >
@@ -314,6 +307,7 @@ export const App: React.FC = () => {
           </footer>
         )}
       </div>
+
       <ErrorMessage
         errorMessage={errorMessage}
         setErrorMessage={setErrorMessage}
